@@ -1,0 +1,3 @@
+ALTER TABLE queues
+  ADD COLUMN IF NOT EXISTS rate_per_sec DOUBLE PRECISION CHECK (rate_per_sec > 0),
+  ADD COLUMN IF NOT EXISTS burst INTEGER CHECK (burst >= 1);
