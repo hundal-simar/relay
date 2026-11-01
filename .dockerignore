@@ -1,6 +1,9 @@
 node_modules
 dist
-.env
-.env.test
-*.log
+coverage
 .git
+.env
+.env.*
+*.log
+dashboard
+sql/init

@@ -45,7 +45,8 @@ router.get("/jobs", async (req, res, next) => {
   try {
     const status = typeof req.query.status === "string" ? req.query.status : undefined;
     const limit = Math.min(Number(req.query.limit) || 20, 100);
-    const jobs = await listJobs({ status, limit });
+    const jobs = await listJobs({ ...(status !== undefined ? { status } : {}),
+  limit });
     res.json({ success: true, data: jobs });
   } catch (err) {
     next(err);

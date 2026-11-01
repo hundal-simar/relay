@@ -3,6 +3,15 @@ import { redis } from "../../events/redis";
 import { takeToken } from "../../ratelimit/tokenBucket";
 import { claimNextJob } from "../../workers/claim";
 import { releaseJob } from "../../workers/complete";
+import { closeRedis } from "../../events/redis";
+
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+} from "@jest/globals";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -13,8 +22,17 @@ beforeEach(async () => {
   await pool.query("TRUNCATE jobs, queues RESTART IDENTITY CASCADE");
   await pool.query("INSERT INTO queues (name) VALUES ('a'), ('b')");
 });
+
+beforeAll(async () => {
+  if (redis.status !== "ready") {
+    await Promise.race([
+      new Promise((r) => redis.once("ready", r)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("Redis not reachable on localhost:6379")), 5000)),
+    ]);
+  }
+});
 afterAll(async () => {
-  await redis.quit();
+  await closeRedis();
   await pool.end();
 });
 

@@ -2,13 +2,31 @@ import { pool } from "../../db";
 import { redis } from "../../events/redis";
 import { runDueSchedules } from "../../scheduler/scheduler";
 import { isValidSchedule, nextRun } from "../../scheduler/cron";
+import { closeRedis } from "../../events/redis";
+
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+} from "@jest/globals";
+
+beforeAll(async () => {
+  if (redis.status !== "ready") {
+    await Promise.race([
+      new Promise((r) => redis.once("ready", r)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("Redis not reachable on localhost:6379")), 5000)),
+    ]);
+  }
+});
 
 beforeEach(async () => {
   await pool.query("TRUNCATE jobs, queues RESTART IDENTITY CASCADE");
   await pool.query("INSERT INTO queues (name) VALUES ('reports')");
 });
 afterAll(async () => {
-  await redis.quit();
+  await closeRedis();
   await pool.end();
 });
 

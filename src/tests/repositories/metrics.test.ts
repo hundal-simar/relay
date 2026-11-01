@@ -1,11 +1,34 @@
 import { pool } from "../../db";
+import { redis } from "../../events/redis";
 import { getMetrics } from "../../repositories/metricsRepository";
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+} from "@jest/globals";
+import { closeRedis } from "../../events/redis";
+
 
 beforeEach(async () => {
   await pool.query("TRUNCATE jobs, queues RESTART IDENTITY CASCADE");
   await pool.query("INSERT INTO queues (name) VALUES ('emails')");
 });
-afterAll(() => pool.end());
+
+beforeAll(async () => {
+  if (redis.status !== "ready") {
+    await Promise.race([
+      new Promise((r) => redis.once("ready", r)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("Redis not reachable on localhost:6379")), 5000)),
+    ]);
+  }
+});
+
+afterAll(async () => {
+  await pool.end();
+  await closeRedis();
+});
 
 it("computes depth, scheduled, and failure rate", async () => {
   await pool.query(`

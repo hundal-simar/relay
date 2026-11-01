@@ -5,6 +5,17 @@ import {
   listJobs,
 } from "../../repositories/jobsRepository";
 import { truncateTables } from "../helpers/truncate";
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+  describe,
+} from "@jest/globals";
+import { closeRedis } from "../../events/redis";
+
+
 
 describe("Jobs Repository", () => {
   beforeEach(async () => {
@@ -13,6 +24,7 @@ describe("Jobs Repository", () => {
 
   afterAll(async () => {
     await pool.end();
+    await closeRedis();
   });
 
   it("findJobById returns null", async () => {

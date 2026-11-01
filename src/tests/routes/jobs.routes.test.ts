@@ -3,15 +3,34 @@ import app from "../../app";
 import { pool } from "../../db";
 import { truncateTables } from "../helpers/truncate";
 import {redis} from "../../events/redis";
+import { closeRedis } from "../../events/redis";
+
+import {
+  beforeAll,
+  beforeEach,
+  afterAll,
+  it,
+  expect,
+  describe,
+} from "@jest/globals";
 
 describe("Jobs Routes", () => {
   beforeEach(async () => {
     await truncateTables();
   });
 
+  beforeAll(async () => {
+  if (redis.status !== "ready") {
+    await Promise.race([
+      new Promise((r) => redis.once("ready", r)),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("Redis not reachable on localhost:6379")), 5000)),
+    ]);
+  }
+});
+
   afterAll(async () => {
     await pool.end();
-    await redis.quit();
+    await closeRedis();
   });
 
   it("creates a job", async () => {

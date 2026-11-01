@@ -1,45 +1,121 @@
 
+name: relay
+
+x-app-env: &app-env
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: ${DB_NAME:?set DB_NAME in .env}
+  DB_USER: ${DB_USER:?set DB_USER in .env}
+  DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  DASHBOARD_ORIGIN: http://localhost:8080
+  POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-1000}
+  HEARTBEAT_MS: ${HEARTBEAT_MS:-10000}
+  STALE_JOB_TIMEOUT_MS: ${STALE_JOB_TIMEOUT_MS:-60000}
+  REAPER_INTERVAL_MS: ${REAPER_INTERVAL_MS:-30000}
+  SCHEDULER_INTERVAL_MS: ${SCHEDULER_INTERVAL_MS:-5000}
+
 services:
   postgres:
     image: postgres:16-alpine
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: Simar
-      POSTGRES_PASSWORD: posT_683*
-      POSTGRES_DB: relay_db
+      POSTGRES_USER: ${DB_USER:?set DB_USER in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:?set DB_NAME in .env}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-  
+  migrate:
+    build:
+      context: .
+      target: api
+    command: ["node", "dist/migrate.js"]
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
-    env_file:
-      - .env
+      target: api
+    restart: unless-stopped
+    init: true
+    environment: *app-env
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
-      - redis
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
-    env_file:
-      - .env
+      target: worker
+    restart: unless-stopped
+    init: true
+    environment: *app-env
+    stop_grace_period: 12s
     depends_on:
-      - postgres
-      - redis
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const s=require('fs').statSync('/tmp/worker-alive');process.exit(Date.now()-s.mtimeMs<15000?0:1)"
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        VITE_API_URL: http://localhost:3000
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
 
 volumes:
   pgdata:

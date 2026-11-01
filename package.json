@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand",
-    "migrate": "ts-node scripts/migrate.ts",
     "build": "tsc",
-    "smoke": "ts-node src/scratch/smoke.ts"
+    "smoke": "ts-node src/scratch/smoke.ts",
+    "migrate": "ts-node src/migrate.ts",
+    "migrate:test": "cross-env DB_HOST=localhost DB_NAME=relay_test REDIS_HOST=localhost ts-node src/migrate.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,13 +21,14 @@
     "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
+    "cross-env": "^10.1.0",
     "jest": "^30.5.2",
     "nodemon": "^3.1.14",
     "socket.io-client": "^4.8.4",
     "supertest": "^7.3.1",
-    "ts-jest": "^29.4.14",
+    "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "cors": "^2.8.6",

@@ -1,4 +1,4 @@
-
+import { writeFileSync } from "fs";
 import { randomUUID } from "crypto";
 import { claimNextJob } from "./workers/claim";
 import { sleep } from "./workers/sleep";
@@ -37,6 +37,17 @@ const SCHEDULER_INTERVAL_MS =
 let schedulerRun: Promise<void> = Promise.resolve();
 let schedulerBusy = false;
 
+
+const ALIVE_FILE = "/tmp/worker-alive";
+const touchAlive = () => {
+  try {
+    writeFileSync(ALIVE_FILE, String(Date.now()));
+  } catch {
+    /* healthcheck will report it */
+  }
+};
+touchAlive();
+const aliveTimer = setInterval(touchAlive, 5000);
 // queueId -> timestamp (milliseconds) until which this worker avoids that queue
 const blockedUntil = new Map<number, number>();
 
@@ -292,6 +303,7 @@ async function shutdown(signal: string) {
   forceExit.unref();
 
   clearInterval(schedulerTimer);
+  clearInterval(aliveTimer);
 
   await schedulerRun;
   await loopPromise;

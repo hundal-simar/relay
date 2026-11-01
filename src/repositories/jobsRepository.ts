@@ -1,6 +1,6 @@
-import type { Pool } from "pg";
+import  { pool } from "../db";
 
-const pool: Pool = require("../db");
+
 
 interface InsertJobInput {
   queueId: number;
