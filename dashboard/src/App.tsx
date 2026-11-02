@@ -33,7 +33,7 @@ export default function App() {
     <main className="min-h-screen bg-slate-950 text-slate-200">
       <div className="mx-auto max-w-5xl px-4 py-6">
         <header className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Forge</h1>
+          <h1 className="text-2xl font-semibold">Relay</h1>
           <span
             className={`rounded-full px-3 py-0.5 text-xs font-medium ${
               connected ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"

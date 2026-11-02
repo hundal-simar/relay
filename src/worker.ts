@@ -19,6 +19,8 @@ import { publishJobEvent, redis } from "./events/redis";
 import { runDueSchedules } from "./scheduler/scheduler";
 import { checkRateLimit } from "./ratelimit/gate";
 
+
+const CONCURRENCY = Number(process.env.WORKER_CONCURRENCY) || 1;
 const workerId = `worker-${randomUUID().slice(0, 8)}`;
 
 const POLL_INTERVAL_MS =
@@ -276,8 +278,9 @@ async function loop(): Promise<void> {
 // Start worker
 startReaper();
 
-const loopPromise = loop();
-
+const loopPromise = Promise.all(
+  Array.from({ length: CONCURRENCY }, () => loop())
+).then(() => undefined);
 // Graceful shutdown
 async function shutdown(signal: string) {
   if (shuttingDown) return;

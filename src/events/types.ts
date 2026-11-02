@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const JOB_EVENTS_CHANNEL = "forge:job-events";
+export const JOB_EVENTS_CHANNEL = "relay:job-events";
 
 export const jobEventSchema = z.object({
   type: z.enum(["enqueued", "started", "completed", "retrying", "failed", "reclaimed"]),

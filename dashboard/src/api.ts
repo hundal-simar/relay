@@ -2,9 +2,8 @@ import type { JobStatus } from "./types";
 import type { Counts, JobView } from "./types";
 import type { Metrics } from "./types";
 
-
-
 export const API_URL = import.meta.env.VITE_API_URL as string;
+export const SOCKET_ORIGIN = new URL(API_URL).origin;         
 
 interface ApiJobRow {
   id: string | number; 

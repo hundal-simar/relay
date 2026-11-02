@@ -14,11 +14,11 @@ app.use(express.json());
 
 app.use(cors({ origin: process.env.DASHBOARD_ORIGIN ?? "http://localhost:5173" }));
 
-app.use('/api/health', healthRouter);
+app.use('/api', healthRouter);
 app.use('/api', jobsRouter);
-app.use('/api/metrics', metricsRouter);
-app.use('/api/schedules', schedulesRouter);
-app.use('/api/queues', queuesRouter);
+app.use('/api', metricsRouter);
+app.use('/api', schedulesRouter);
+app.use('/api', queuesRouter);
 
 
 

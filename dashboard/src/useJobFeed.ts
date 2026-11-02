@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import { io } from "socket.io-client";
-import { API_URL, fetchCounts, fetchRecentJobs } from "./api";
+import { fetchCounts, fetchRecentJobs, SOCKET_ORIGIN } from "./api";
 import type { Counts, JobEvent, JobView } from "./types";
 
 const MAX_ROWS = 200;
@@ -55,7 +55,7 @@ export function useJobFeed() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io(API_URL);
+    const socket = io(SOCKET_ORIGIN);
     let cancelled = false;
     let countsTimer: ReturnType<typeof setTimeout> | null = null;
 
