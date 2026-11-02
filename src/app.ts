@@ -6,13 +6,20 @@ import {metricsRouter} from './routes/metrics';
 import {healthRouter} from './routes/health';
 import {schedulesRouter} from './routes/schedules';
 import {queuesRouter} from './routes/queues';
+import { demoRouter } from './routes/demo';
 import cors from 'cors';
+import { apiLimiter, requireApiKey, } from './middleware/security';
 
 const app = express();
 
 app.use(express.json());
 
 app.use(cors({ origin: process.env.DASHBOARD_ORIGIN ?? "http://localhost:5173" }));
+
+app.set("trust proxy", 1);
+app.use(apiLimiter);
+app.use('/api',demoRouter);
+app.use(requireApiKey);
 
 app.use('/api', healthRouter);
 app.use('/api', jobsRouter);

@@ -1,7 +1,9 @@
 import { readdirSync, readFileSync } from "fs";
 import { createHash } from "crypto";
 import path from "path";
+import "./migrateEnv"
 import { pool } from "./db";
+
 
 const MIGRATIONS_DIR = path.join(__dirname, "..", "sql", "migrations");
 const LOCK_ID = 727274; 

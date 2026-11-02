@@ -1,5 +1,6 @@
-// Runs before any test file loads, so dotenv (which never overrides existing vars) can't win
 process.env.NODE_ENV = "test";
+delete process.env.DATABASE_URL;
+delete process.env.REDIS_URL;
 process.env.DB_HOST = "localhost";
-process.env.DB_NAME = "relay_test"; // tests TRUNCATE tables, so never the dev DB
+process.env.DB_NAME = "relay_test";
 process.env.REDIS_HOST = "localhost";

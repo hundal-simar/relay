@@ -31,3 +31,7 @@ CMD ["node", "dist/server.js"]
 
 FROM runtime AS worker
 CMD ["node", "dist/worker.js"]
+
+FROM runtime AS default
+EXPOSE 3000
+CMD ["sh", "-c", "node dist/migrate.js && exec node dist/server.js"]

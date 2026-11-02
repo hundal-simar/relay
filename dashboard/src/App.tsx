@@ -3,10 +3,13 @@ import { useJobFeed } from "./useJobFeed";
 import { useMetrics } from "./useMetrics";
 import MetricsPanel from "./MetricsPanel";
 import type { JobStatus } from "./types";
+import {API_URL} from "./api";
 
 const STATUSES: JobStatus[] = ["pending", "processing", "completed", "failed"];
 type Filter = "all" | JobStatus;
 const FILTERS: Filter[] = ["all", ...STATUSES];
+const sendDemoJob = () => fetch(`${API_URL}/demo/enqueue`, { method: "POST" });
+
 
 const CARD_BORDER: Record<JobStatus, string> = {
   pending: "border-t-yellow-400",
@@ -34,6 +37,7 @@ export default function App() {
       <div className="mx-auto max-w-5xl px-4 py-6">
         <header className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold">Relay</h1>
+          
           <span
             className={`rounded-full px-3 py-0.5 text-xs font-medium ${
               connected ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
@@ -46,7 +50,7 @@ export default function App() {
         {(!connected || metricsError) && (
           <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-300">
             {!connected
-              ? "Lost connection to the server. Reconnecting; data will refresh automatically."
+              ? "Server is waking up (free hosting sleeps when idle, ~1 minute). It will reconnect automatically."
               : "Metrics are temporarily unavailable."}
           </div>
         )}
@@ -102,6 +106,9 @@ export default function App() {
                     {jobs.length === 0
                       ? "No jobs yet. Enqueue one to see it appear."
                       : `No ${filter} jobs in the latest ${jobs.length}.`}
+                      <button onClick={sendDemoJob} className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white hover:bg-blue-400">
+                     Send a demo job
+                    </button>
                   </td>
                 </tr>
               )}
