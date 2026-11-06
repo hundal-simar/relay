@@ -2,13 +2,14 @@ import { Server as HttpServer } from "http";
 import { Server } from "socket.io";
 import { createSubscriber } from "../events/redis";
 import { JOB_EVENTS_CHANNEL, jobEventSchema, JobEvent } from "../events/types";
+import { config } from "../config";
 
 const BATCH_INTERVAL_MS = 100;
 const MAX_BUFFER = 5000;
 
 export function attachRealtime(httpServer: HttpServer) {
   const io = new Server(httpServer, {
-    cors: { origin: process.env.DASHBOARD_ORIGIN ?? "http://localhost:5173" },
+    cors: { origin: config.DASHBOARD_ORIGIN ?? "http://localhost:5173" },
   });
 
   const sub = createSubscriber();
