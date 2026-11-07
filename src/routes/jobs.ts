@@ -53,16 +53,6 @@ router.get("/jobs", async (req, res, next) => {
   }
 });
 
-router.get("/jobs/:id", async (req, res, next) => {
-  try {
-    const job = await findJobById(Number(req.params.id));
-    if (!job) throw new AppError(404, "Job not found");
-    res.json({ success: true, data: job });
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.get("/jobs/counts", async (_req, res, next) => {
   try {
     res.json({ success: true, data: await getStatusCounts() });
@@ -70,5 +60,20 @@ router.get("/jobs/counts", async (_req, res, next) => {
     next(err);
   }
 });
+
+router.get("/jobs/:id", async (req, res, next) => {
+  try {
+    const job = await findJobById(Number(req.params.id));
+    if (!/^\d+$/.test(req.params.id)) {
+     return res.status(400).json({ error: "invalid job id" });
+    }
+    if (!job) throw new AppError(404, "Job not found");
+    res.json({ success: true, data: job });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 
 export default router;
