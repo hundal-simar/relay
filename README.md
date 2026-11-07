@@ -72,7 +72,7 @@ All numbers below were measured on a single local machine with [autocannon](http
 
 | Test | Setup | Result |
 | --- | --- | --- |
-| Automated tests | Jest, `--runInBand` | 23 passing, 5 suites |
+| Automated tests | Jest, `--runInBand` | 33 passing, 6 suites |
 | Index usage | 100,000 jobs seeded, workers stopped, `EXPLAIN` on the claim query | Partial index `idx_jobs_claim` used |
 | Fault tolerance | 1,000 jobs, 4 workers, one worker stopped mid-run | All 1,000 completed, 0 failed, **0 duplicate executions** (checked via `job_executions`) |
 
